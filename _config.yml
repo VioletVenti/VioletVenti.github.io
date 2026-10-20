@@ -9,28 +9,28 @@
 # Basic Site Settings
 locale                   : "en-US"
 site_theme               : "default" # The available themes options are "default", "air", "sunrise", "mint", "dirt" and "contrast"
-title                    : "-VioletHan's site"
+title                    : "Yuqian Han"
 title_separator          : "-"
-name                     : &name "VioletHan"
-description              : &description "VioletHan's academic portfolio"   # Update this with a general description of your site, this is the default if not overridden by a page
+name                     : &name "Yuqian Han"
+description              : &description "Yuqian Han (韩雨潜) — undergraduate at Peking University working on LLM agents"   # Update this with a general description of your site, this is the default if not overridden by a page
 url                      : https://violetventi.github.io # The base hostname & protocol for your site e.g. "https://[your GitHub username].github.io",
                                                            # or if you already have some other page hosted on Github then use "https://[your GitHub username].github.io/[Your Repo Name]"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
-repository               : "VioletVenti/Violetventi.github.io"
+repository               : "VioletVenti/VioletVenti.github.io"
 
 # Site Author - The following control what appear as part of the author content on the side bar.
 #               If a field is blank the icon and link will not appear, otherwise it will be shown.
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "white.png"
-  name             : "Yourname"
+  avatar           : "avatar.jpg"
+  name             : "Yuqian Han (韩雨潜)"
   pronouns         : # example: "she/her"  
-  bio              : "Peking University"
-  location         : "Earth"
-  employer         : "Red Brick University"
+  bio              : "Undergraduate in Intelligence Science and Technology at Peking University. Agent harnesses, recursive self-improvement, agent RL."
+  location         : "Beijing, China"
+  employer         : "Peking University"
   uri              : # URL
-  email            : "yqhan@stu.pku.edu.cn" 
+  email            : "yqhan25@stu.pku.edu.cn" 
 
   # Academic websites
   academia         : # URL
@@ -53,11 +53,11 @@ author:
   dribbble         : # Username
   github           : "VioletVenti"
   kaggle           : # Username  
-  stackoverflow    : "31491979/venti-969" (i.e., use "1" or "1/jeff-atwood")    
+  stackoverflow    : "31491979/venti-969"    
 
   # Social media
   artstation       : # Username
-  bluesky          : "bsky.app" # Replace this with you Bluesky username
+  bluesky          : # Replace this with you Bluesky username
   facebook         : # Username
   flickr           : # Username
   foursquare       : # Username
@@ -84,12 +84,12 @@ author:
 
 # Publication Category - The following the list of publication categories and their headings
 publication_category:
-  books:
-    title:#
+  preprints:
+    title: 'Preprints'
   manuscripts:
-    title:#
+    title: 'Journal Articles'
   conferences:
-    title:#
+    title: 'Conference Papers'
 
 # Site Settings
 teaser                   :  # filename of teaser fallback teaser image placed in /images/ for social media previews

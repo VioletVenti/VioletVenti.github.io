@@ -11,54 +11,27 @@ redirect_from:
 
 Education
 ======
-* Ph.D in Version Control Theory, GitHub University, 2018 (expected)
-* M.S. in Jekyll, GitHub University, 2014
-* B.S. in GitHub, GitHub University, 2012
+* B.S. in Intelligence Science and Technology, Peking University, 2025 – present (expected 2029)
 
-Work experience
+Research interests
 ======
-* Spring 2024: Academic Pages Collaborator
-  * GitHub University
-  * Duties includes: Updates and improvements to template
-  * Supervisor: The Users
+* Agent harnesses, recursive self-improvement (RSI), agent RL
 
-* Fall 2015: Research Assistant
-  * GitHub University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
+Projects
+======
+* **recuris-lite** (2026.10) — reproduction of agent skill-memory self-evolution ([arXiv:2608.24876](https://arxiv.org/abs/2608.24876)); [code](https://github.com/VioletVenti/recuris-lite)
+* **cure-lite** (2026.10) — reproduction of coder / unit-tester co-evolution RL ([arXiv:2506.03136](https://arxiv.org/abs/2506.03136)); [code](https://github.com/VioletVenti/cure-lite)
+* **Klaude Code** (2026.07 – 2026.10) — Claude Code-style coding agent built from scratch; [code](https://github.com/VioletVenti/Klaude-Code)
 
-* Summer 2015: Research Assistant
-  * GitHub University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
-  
 Skills
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
-* Skill 3
+* **ML foundations:** probability and information theory, optimization, reinforcement learning; Transformers and LLM inference (KV cache, PagedAttention)
+* **Post-training:** SFT, PPO, DPO, GRPO and variants, RLVR, reward models and verifiers
+* **Agents:** harness engineering (tools, MCP, context, memory, skills)
+* **Engineering:** Python, C++; PyTorch, transformers, vLLM; Linux, Docker
 
 Publications
 ======
   <ul>{% for post in site.publications reversed %}
     {% include archive-single-cv.html %}
   {% endfor %}</ul>
-  
-Talks
-======
-  <ul>{% for post in site.talks reversed %}
-    {% include archive-single-talk-cv.html  %}
-  {% endfor %}</ul>
-  
-Teaching
-======
-  <ul>{% for post in site.teaching reversed %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Service and leadership
-======
-* Currently signed in to 43 different slack teams
