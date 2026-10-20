@@ -2,6 +2,8 @@
 title: "Klaude Code: a Claude Code-style coding agent"
 excerpt: "A terminal coding agent built from scratch in 20 stages, following the learn-claude-code course. [Code](https://github.com/VioletVenti/Klaude-Code)"
 collection: portfolio
+order: 3
+date: 2026-10-18
 ---
 
 **Code:** [github.com/VioletVenti/Klaude-Code](https://github.com/VioletVenti/Klaude-Code) (MIT) · July – October 2026

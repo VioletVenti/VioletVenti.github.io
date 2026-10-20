@@ -2,6 +2,8 @@
 title: "recuris-lite: self-evolving skill memory for agents"
 excerpt: "A scaled-down reproduction of Recuris (arXiv:2608.24876): the model weights stay frozen and only the agent's skill memory evolves. [Code](https://github.com/VioletVenti/recuris-lite)"
 collection: portfolio
+order: 1
+date: 2026-10-20
 ---
 
 **Code:** [github.com/VioletVenti/recuris-lite](https://github.com/VioletVenti/recuris-lite) · **Paper reproduced:** [arXiv:2608.24876](https://arxiv.org/abs/2608.24876)

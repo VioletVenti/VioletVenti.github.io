@@ -2,6 +2,8 @@
 title: "cure-lite: co-evolving coder and unit tester with RL"
 excerpt: "A from-scratch implementation of CURE (arXiv:2506.03136). One model acts as both coder and unit tester, rewarded through a code × test execution matrix. [Code](https://github.com/VioletVenti/cure-lite)"
 collection: portfolio
+order: 2
+date: 2026-10-20
 ---
 
 **Code:** [github.com/VioletVenti/cure-lite](https://github.com/VioletVenti/cure-lite) · **Paper reproduced:** [arXiv:2506.03136](https://arxiv.org/abs/2506.03136)
