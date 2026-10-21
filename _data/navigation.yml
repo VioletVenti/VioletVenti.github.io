@@ -14,8 +14,8 @@ main:
   - title: "Projects"
     url: /portfolio/
 
-  - title: "Courses"
-    url: /courses/
+  - title: "Blog"
+    url: https://violetventi.github.io/Archive/
 
   - title: "CV"
     url: /cv/

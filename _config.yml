@@ -166,7 +166,6 @@ include:
   - _pages
   - files
 exclude:
-  - docs
   - "*.sublime-project"
   - "*.sublime-workspace"
   - .asset-cache
@@ -234,12 +233,6 @@ collections:
   talks:
     output: true
     permalink: /:collection/:path/
-  courses:
-    output: true
-    permalink: /courses/:path/
-  notes:
-    output: true
-    permalink: /courses/:path/
 
 
 # These settings control how pages and collections are included in the site
@@ -297,20 +290,6 @@ defaults:
       layout: talk
       author_profile: true
       share: true
-  # _courses
-  - scope:
-      path: ""
-      type: courses
-    values:
-      layout: course
-      author_profile: true
-  # _notes
-  - scope:
-      path: ""
-      type: notes
-    values:
-      layout: note
-      author_profile: true
 
 
 # Sass/SCSS
