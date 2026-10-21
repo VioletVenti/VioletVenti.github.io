@@ -1,0 +1,42 @@
+---
+layout: default
+---
+
+{% include base_path %}
+
+{% assign course_slug = page.path | split: "/" | slice: 1 | first %}
+{% assign course = site.courses | where: "slug", course_slug | first %}
+{% capture prefix %}_notes/{{ course_slug }}/{% endcapture %}
+{% assign notes = site.notes | where_exp: "note", "note.path contains prefix" | sort: "order" %}
+
+<div id="main" role="main">
+  {% include sidebar.html %}
+
+  <article class="page note" itemscope itemtype="http://schema.org/CreativeWork">
+    <div class="page__inner-wrap">
+      <nav class="course__crumbs">
+        <a href="{{ base_path }}/courses/#{{ course.slug }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ course.title }} {{ course.title_en }}</a>
+        {% if page.updated %}<span>更新于 {{ page.updated | date: "%Y-%m-%d" }}</span>{% endif %}
+      </nav>
+
+      <header>
+        <h1 class="page__title" itemprop="headline">{{ page.title }}</h1>
+      </header>
+
+      <section class="page__content note__body" itemprop="text">
+        {{ content }}
+      </section>
+
+      <nav class="note__pager">
+        {% for note in notes %}
+          {% if note.url == page.url %}
+            {% assign prev_i = forloop.index0 | minus: 1 %}
+            {% assign next_i = forloop.index0 | plus: 1 %}
+            {% if prev_i >= 0 %}{% assign prev = notes[prev_i] %}<a class="note__prev" href="{{ base_path }}{{ prev.url }}"><span>上一篇</span>{{ prev.title }}</a>{% endif %}
+            {% if next_i < notes.size %}{% assign next = notes[next_i] %}<a class="note__next" href="{{ base_path }}{{ next.url }}"><span>下一篇</span>{{ next.title }}</a>{% endif %}
+          {% endif %}
+        {% endfor %}
+      </nav>
+    </div>
+  </article>
+</div>

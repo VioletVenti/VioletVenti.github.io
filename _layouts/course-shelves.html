@@ -1,0 +1,100 @@
+---
+layout: default
+---
+
+{% include base_path %}
+
+{% assign shelf_count = 0 %}
+{% for shelf in site.data.course_shelves %}
+  {% assign shelf_books = site.courses | where: "shelf", shelf.id %}
+  {% if shelf_books.size > 0 %}{% assign shelf_count = shelf_count | plus: 1 %}{% endif %}
+{% endfor %}
+
+<div id="main" role="main">
+  {% include sidebar.html %}
+
+  <div class="archive course-shelves">
+    <header class="shelves__header">
+      <h1 class="shelves__title">{{ page.title }}</h1>
+      <p class="shelves__stats">{{ shelf_count }} 个书架 · {{ site.courses.size }} 本书 · {{ site.notes.size }} 篇笔记</p>
+    </header>
+
+    {% assign tag_blob = "" %}
+    {% for c in site.courses %}{% for t in c.tags %}{% assign tag_blob = tag_blob | append: t | append: "|" %}{% endfor %}{% endfor %}
+    {% assign all_tags = tag_blob | split: "|" | uniq %}
+    {% if all_tags.size > 0 %}
+      <div class="course-filter" role="group" aria-label="按标签筛选" hidden>
+        <ul class="course-filter__tags">
+          {% for t in all_tags %}
+            <li><button type="button" class="course-tag" data-tag="{{ t | escape }}" aria-pressed="false">{{ t }}</button></li>
+          {% endfor %}
+        </ul>
+        <p class="course-filter__status" aria-live="polite" hidden>
+          <span class="course-filter__count"></span>
+          <button type="button" class="course-filter__clear">清除</button>
+        </p>
+      </div>
+    {% endif %}
+
+    {{ content }}
+
+    {% assign shelf_no = 0 %}
+    {% for shelf in site.data.course_shelves %}
+      {% assign books = site.courses | where: "shelf", shelf.id | sort: "order" %}
+      {% if books.size == 0 %}{% continue %}{% endif %}
+      {% assign shelf_no = shelf_no | plus: 1 %}
+
+      {% assign shelf_notes = 0 %}
+      {% for book in books %}
+        {% capture prefix %}_notes/{{ book.slug }}/{% endcapture %}
+        {% assign book_notes = site.notes | where_exp: "note", "note.path contains prefix" %}
+        {% assign shelf_notes = shelf_notes | plus: book_notes.size %}
+      {% endfor %}
+
+      <section class="shelf" id="{{ shelf.id }}">
+        <a class="shelf__summary" href="#{{ shelf.id }}" aria-expanded="false" aria-controls="shelf-panel-{{ shelf.id }}">
+          <span class="shelf__no">No. {{ shelf_no | prepend: "0" | slice: -2, 2 }}</span>
+          <span class="shelf__meta">{{ books.size }} 册 · {{ shelf_notes }} 篇</span>
+          <span class="shelf__zone">
+            <span class="shelf__name">{{ shelf.title }}<span class="shelf__name-en">{{ shelf.title_en }}</span></span>
+            <span class="shelf__preview">{% for book in books %}{{ book.title }}{% unless forloop.last %} · {% endunless %}{% endfor %}</span>
+          </span>
+          <svg class="shelf__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 2.5 11.5 8 6 13.5"/></svg>
+        </a>
+
+        <div class="shelf__panel" id="shelf-panel-{{ shelf.id }}" role="region" aria-label="{{ shelf.title }}">
+          <div class="shelf__panel-inner">
+            <div class="shelf__books">
+              {% for book in books %}
+                {% capture prefix %}_notes/{{ book.slug }}/{% endcapture %}
+                {% assign book_notes = site.notes | where_exp: "note", "note.path contains prefix" %}
+                <a class="book" href="{{ base_path }}{{ book.url }}" data-course="{{ book.slug }}" data-tags="{{ book.tags | join: '|' | escape }}" style="--i: {{ forloop.index0 }}">
+                  <span class="book__vol">VOL. {{ book.order | prepend: "0" | slice: -2, 2 }}</span>
+                  <span class="book__title">{{ book.title }}</span>
+                  <span class="book__title-en">{{ book.title_en }}</span>
+                  <span class="book__meta">{{ book_notes.size }} 篇</span>
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+</div>
+
+{% for book in site.courses %}
+  <template id="course-tpl-{{ book.slug }}">
+    {% include course-detail.html course=book body=book.content %}
+  </template>
+{% endfor %}
+
+<div class="course-modal" id="course-modal" hidden>
+  <div class="course-modal__backdrop" data-modal-close></div>
+  <div class="course-modal__dialog" role="dialog" aria-modal="true" tabindex="-1">
+    <button type="button" class="course-modal__close" data-modal-close aria-label="关闭"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+    <div class="course-modal__body course"></div>
+  </div>
+</div>
+
+<script src="{{ base_path }}/assets/js/courses.js" defer></script>
