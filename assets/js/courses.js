@@ -2,8 +2,8 @@
    - Opening a shelf rewrites the URL to /courses/#<shelf> (replaceState, no history spam).
    - Opening a course pushes /courses/#<course>, so Back closes the dialog.
    - /courses/#<shelf> and /courses/#<course> deep-link.
-   - Tags filter the books (AND); the selection lives in ?tags=a,b and every
-     shelf with a match unfolds at once.
+   - Tags filter the books (AND), picked from a searchable full-screen index;
+     the selection lives in ?tags=a,b and every shelf with a match unfolds.
    Without JS: #<shelf> still opens via :target, and book cards link to the
    standalone course pages. */
 (function () {
@@ -191,29 +191,40 @@
   });
 
   document.addEventListener("keydown", function (event) {
+    if (searchOpen) {
+      if (event.key === "Escape") { event.preventDefault(); closeSearch(); }
+      else if (event.key === "Tab") trapFocus(event, search.querySelector(".tag-search__panel"));
+      return;
+    }
     if (event.key === "Escape") {
       if (current) { requestClose(); return; }
       if (active) { var shelf = active; toggle(shelf); shelf.summary.focus({ preventScroll: true }); }
       return;
     }
-    if (event.key !== "Tab" || !current) return;
-    // keep focus inside the dialog
-    var items = dialog.querySelectorAll("a[href], button:not([disabled])");
-    if (!items.length) return;
-    var first = items[0], last = items[items.length - 1];
-    if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+    if (event.key === "Tab" && current) trapFocus(event, dialog);
+  });
+
+  // keep Tab focus inside an open dialog
+  function trapFocus(event, box) {
+    var focusable = [].filter.call(box.querySelectorAll("a[href], button:not([disabled]), input"), function (el) {
+      return !el.closest("[hidden]");
+    });
+    if (!focusable.length) return;
+    var first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === box)) {
       event.preventDefault(); last.focus();
     } else if (!event.shiftKey && document.activeElement === last) {
       event.preventDefault(); first.focus();
     }
-  });
+  }
 
   /* ---------- Tag filter ---------- */
 
+  // The bar under the title shows the selected tags; clicking it (or "/")
+  // opens a full-screen index of all tags, A-Z with semesters first, that
+  // narrows as you type. Picking tags there filters the shelves live.
   var filterBar = root.querySelector(".course-filter");
-  var tagButtons = filterBar ? [].slice.call(filterBar.querySelectorAll(".course-tag")) : [];
-  var known = {};
-  tagButtons.forEach(function (b) { known[b.getAttribute("data-tag")] = true; });
+  var search = document.getElementById("tag-search");
   var books = [].slice.call(root.querySelectorAll(".book[data-course]")).map(function (node) {
     var tags = node.getAttribute("data-tags");
     return { node: node, tags: tags ? tags.split("|") : [], match: true };
@@ -221,6 +232,10 @@
   var selected = [];
   var filtering = false;
   var pendingTags = null;
+
+  var totals = {};
+  books.forEach(function (b) { b.tags.forEach(function (t) { totals[t] = (totals[t] || 0) + 1; }); });
+  var allTags = Object.keys(totals);
 
   // "Fall 2025" style tags come first, oldest first; the rest go A-Z,
   // ignoring case and reading digits as numbers (CS61A before CS106B).
@@ -238,9 +253,13 @@
     }
     return a.localeCompare(b, "en", { sensitivity: "base", numeric: true });
   }
+  allTags.sort(compareTags);
 
   function matches(book, tags) {
     return tags.every(function (t) { return book.tags.indexOf(t) !== -1; });
+  }
+  function countFor(tags) {
+    return books.filter(function (b) { return matches(b, tags); }).length;
   }
 
   function readQuery() {
@@ -253,8 +272,70 @@
     history.replaceState(history.state, "", location.pathname + query + location.hash);
   }
 
+  /* index */
+
+  var items = [];   // { tag, node, count, group }
+  var groups = [];  // { node, items }
+  if (search) {
+    var index = search.querySelector(".tag-index");
+    var empty = index.querySelector(".tag-index__empty");
+    search.querySelector(".tag-index__total").textContent = allTags.length + " 个标签";
+    var group = null;
+    allTags.forEach(function (tag) {
+      var label = termKey(tag) !== null ? "Semester" : /^[a-z]/i.test(tag) ? tag[0].toUpperCase() : "#";
+      if (!group || group.label !== label) {
+        group = { label: label, node: document.createElement("div"), items: [] };
+        group.node.className = "tag-index__group";
+        var h = document.createElement("h2");
+        h.textContent = label;
+        group.node.appendChild(h);
+        index.insertBefore(group.node, empty);
+        groups.push(group);
+      }
+      var node = document.createElement("button");
+      node.type = "button";
+      node.className = "tag-index__item" + (totals[tag] >= 5 ? " is-large" : "");
+      node.setAttribute("data-tag", tag);
+      node.innerHTML = '<span class="tag-index__name"></span><small class="tag-index__count"></small>';
+      node.firstChild.textContent = tag;
+      group.node.appendChild(node);
+      var item = { tag: tag, node: node, group: group };
+      group.items.push(item);
+      items.push(item);
+    });
+  }
+
+  function filterIndex() {
+    var q = search.querySelector(".tag-search__input").value.trim().toLowerCase();
+    var any = false;
+    groups.forEach(function (g) {
+      var shown = 0;
+      g.items.forEach(function (item) {
+        var hit = !q || item.tag.toLowerCase().indexOf(q) !== -1;
+        item.node.hidden = !hit;
+        if (hit) shown++;
+      });
+      g.node.hidden = !shown;
+      if (shown) any = true;
+    });
+    search.querySelector(".tag-index__empty").hidden = any;
+  }
+
+  function chip(tag) {
+    var li = document.createElement("li");
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "tag-chip";
+    b.setAttribute("data-remove-tag", tag);
+    b.setAttribute("aria-label", "移除标签 " + tag);
+    b.innerHTML = '<span></span><i class="fas fa-xmark" aria-hidden="true"></i>';
+    b.firstChild.textContent = tag;
+    li.appendChild(b);
+    return li;
+  }
+
   function applyFilter(tags) {
-    selected = tags.filter(function (t, i) { return known[t] && tags.indexOf(t) === i; });
+    selected = tags.filter(function (t, i) { return totals[t] && tags.indexOf(t) === i; });
     var wasFiltering = filtering;
     filtering = selected.length > 0;
     root.classList.toggle("is-filtering", filtering);
@@ -281,53 +362,129 @@
       if (byKey[key]) show(byKey[key]);
     }
 
-    tagButtons.forEach(function (button) {
-      var tag = button.getAttribute("data-tag");
-      var on = selected.indexOf(tag) !== -1;
-      button.setAttribute("aria-pressed", String(on));
-      // grey out tags that would leave nothing to show
-      var next = selected.concat(tag);
-      button.disabled = !on && !books.some(function (b) { return matches(b, next); });
+    // counts are for "the current selection plus this tag", so a tag that
+    // would leave nothing is greyed out
+    items.forEach(function (item) {
+      var on = selected.indexOf(item.tag) !== -1;
+      var n = on ? total : countFor(selected.concat(item.tag));
+      item.node.setAttribute("aria-pressed", String(on));
+      item.node.disabled = !on && n === 0;
+      item.node.lastChild.textContent = n;
     });
 
-    if (filterBar) {
-      filterBar.querySelector(".course-filter__status").hidden = !filtering;
-      filterBar.querySelector(".course-filter__count").textContent = "匹配 " + total + " 门";
-    }
+    [filterBar, search].forEach(function (box) {
+      if (!box) return;
+      var list = box.querySelector(".tag-bar__chips, .tag-search__chips");
+      list.innerHTML = "";
+      selected.forEach(function (t) { list.appendChild(chip(t)); });
+      var counter = box.querySelector(".course-filter__count");
+      counter.textContent = "匹配 " + total + " 门";
+      counter.parentNode.hidden = !filtering;
+    });
+    if (filterBar) filterBar.classList.toggle("has-selection", filtering);
+  }
+
+  function setTags(tags) {
+    applyFilter(tags);
+    writeQuery();
+  }
+
+  function toggleTag(tag) {
+    var on = selected.indexOf(tag) !== -1;
+    setTags(on ? selected.filter(function (t) { return t !== tag; }) : selected.concat(tag));
   }
 
   function applyPending() {
     if (!pendingTags) return;
     var tags = pendingTags;
     pendingTags = null;
-    applyFilter(tags);
-    writeQuery();
+    setTags(tags);
     if (filterBar) filterBar.scrollIntoView({ block: "nearest", behavior: reduce.matches ? "auto" : "smooth" });
   }
 
-  if (filterBar) {
-    var list = filterBar.querySelector(".course-filter__tags");
-    tagButtons.sort(function (a, b) {
-      return compareTags(a.getAttribute("data-tag"), b.getAttribute("data-tag"));
-    }).forEach(function (button) { list.appendChild(button.parentNode); });
+  /* overlay */
+
+  var searchOpen = false;
+  var searchHideTimer = null;
+  var searchInput = search && search.querySelector(".tag-search__input");
+
+  function openSearch() {
+    if (!search || searchOpen) return;
+    searchOpen = true;
+    clearTimeout(searchHideTimer);
+    searchInput.value = "";
+    filterIndex();
+    search.hidden = false;
+    document.documentElement.classList.add("course-modal-open");
+    void search.offsetWidth;
+    search.classList.add("is-open");
+    searchInput.focus({ preventScroll: true });
+  }
+
+  function closeSearch() {
+    if (!searchOpen) return;
+    searchOpen = false;
+    search.classList.remove("is-open");
+    document.documentElement.classList.remove("course-modal-open");
+    searchHideTimer = setTimeout(function () { search.hidden = true; }, reduce.matches ? 0 : 220);
+    var opener = filterBar.querySelector(".tag-bar__open");
+    opener.focus({ preventScroll: true });
+  }
+
+  if (filterBar && search) {
     filterBar.hidden = false;
 
     filterBar.addEventListener("click", function (event) {
-      var button = event.target.closest(".course-tag");
-      if (button) {
-        var tag = button.getAttribute("data-tag");
-        var on = selected.indexOf(tag) !== -1;
-        applyFilter(on ? selected.filter(function (t) { return t !== tag; }) : selected.concat(tag));
-        writeQuery();
-        return;
-      }
-      if (event.target.closest(".course-filter__clear")) {
-        applyFilter([]);
-        writeQuery();
-        if (tagButtons[0]) tagButtons[0].focus({ preventScroll: true });
+      var remove = event.target.closest("[data-remove-tag]");
+      // the chips are rebuilt, so hand focus to the bar
+      if (remove) { toggleTag(remove.getAttribute("data-remove-tag")); filterBar.querySelector(".tag-bar__open").focus(); return; }
+      if (event.target.closest(".course-filter__clear")) { setTags([]); filterBar.querySelector(".tag-bar__open").focus(); return; }
+      if (event.target.closest(".tag-bar")) openSearch();
+    });
+
+    search.addEventListener("click", function (event) {
+      if (event.target.closest("[data-tag-search-close]")) { closeSearch(); return; }
+      var remove = event.target.closest("[data-remove-tag]");
+      if (remove) { toggleTag(remove.getAttribute("data-remove-tag")); searchInput.focus(); return; }
+      if (event.target.closest(".course-filter__clear")) { setTags([]); searchInput.focus(); return; }
+      var item = event.target.closest(".tag-index__item");
+      if (item && !item.disabled) toggleTag(item.getAttribute("data-tag"));
+    });
+
+    searchInput.addEventListener("input", filterIndex);
+    searchInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        // pick the best tag the query still shows (exact, then prefix, then a
+        // word prefix, then anywhere), then start over
+        event.preventDefault();
+        var q = searchInput.value.trim().toLowerCase();
+        if (!q) return;
+        var rank = function (tag) {
+          tag = tag.toLowerCase();
+          return tag === q ? 0 : tag.indexOf(q) === 0 ? 1 : (" " + tag).indexOf(" " + q) !== -1 ? 2 : 3;
+        };
+        var best = null;
+        items.forEach(function (i) {
+          if (i.node.hidden || i.node.disabled) return;
+          if (!best || rank(i.tag) < rank(best.tag)) best = i;
+        });
+        if (!best) return;
+        toggleTag(best.tag);
+        searchInput.value = "";
+        filterIndex();
+      } else if (event.key === "Backspace" && !searchInput.value && selected.length) {
+        setTags(selected.slice(0, -1));
       }
     });
   }
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "/" || searchOpen || current || event.metaKey || event.ctrlKey || event.altKey) return;
+    var t = event.target;
+    if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    event.preventDefault();
+    openSearch();
+  });
 
   /* ---------- Routing: #<shelf> or #<course> ---------- */
 

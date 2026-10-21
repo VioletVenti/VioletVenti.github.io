@@ -57,29 +57,18 @@ html[data-theme="dark"] {
   [hidden] { display: none !important; }
 }
 
-/* Tags: filter bar on /courses/ and the list in the course detail
+/* Tags: search bar on /courses/, full-screen tag index, detail tag list
    ========================================================================== */
 
 .course-filter {
-  padding: 1em 0 0.4em;
+  padding: 1em 0 0.6em;
   border-bottom: 1px solid var(--global-border-color);
-
-  &__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45em;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-
-    li { margin: 0; }
-  }
 
   &__status {
     display: flex;
     align-items: baseline;
     gap: 0.8em;
-    margin: 0.7em 0 0.3em;
+    margin: 0.6em 0 0;
     font-size: $type-size-6;
     letter-spacing: 0.06em;
     color: var(--global-text-color-light);
@@ -98,39 +87,317 @@ html[data-theme="dark"] {
   }
 }
 
+/* looks like an input; the whole strip opens the index */
+.tag-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4em 0.6em;
+  min-height: 2.6em;
+  padding: 0.3em 0.2em 0.3em 0;
+  border-bottom: 1px solid var(--global-text-color);
+  cursor: text;
+  transition: border-color 0.15s ease;
+
+  &:hover,
+  &:focus-within { border-bottom-color: var(--course-accent); }
+
+  &__icon {
+    font-size: $type-size-6;
+    color: var(--global-text-color-light);
+  }
+
+  &__chips {
+    display: contents;
+    list-style: none;
+
+    li { margin: 0; }
+  }
+
+  &__open {
+    display: flex;
+    flex: 1 1 8em;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 8em;
+    padding: 0.2em 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: $type-size-5;
+    color: var(--global-text-color-light);
+    text-align: left;
+    cursor: text;
+
+    &:focus { outline: none; }
+  }
+
+  &__key {
+    padding: 0 0.45em;
+    border: 1px solid var(--global-border-color);
+    border-radius: 4px;
+    font-family: $monospace;
+    font-size: $type-size-7;
+    line-height: 1.6;
+    color: var(--global-text-color-light);
+  }
+}
+
+.course-filter.has-selection .tag-bar__placeholder { visibility: hidden; }
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  margin: 0;
+  padding: 0.15em 0.65em;
+  border: 1px solid var(--course-accent);
+  border-radius: 999px;
+  background: var(--course-accent);
+  font-family: inherit;
+  font-size: $type-size-6;
+  line-height: 1.5;
+  color: var(--global-bg-color);
+  cursor: pointer;
+
+  i { font-size: 0.85em; opacity: 0.75; }
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+    i { opacity: 1; }
+  }
+}
+
+.tag-search {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8vh 1rem 1rem;
+
+  &[hidden] { display: none; }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--global-bg-color);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &.is-open &__backdrop { opacity: 0.9; }
+
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    &__backdrop {
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+  }
+
+  &__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(56rem, 100%);
+    max-height: 84vh;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  &.is-open &__panel { opacity: 1; transform: none; }
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    border-bottom: 2px solid var(--course-accent);
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0.4em 0.2em;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    font-size: 1.4em;
+    color: var(--global-text-color);
+    -webkit-appearance: none;
+    appearance: none;
+
+    &:focus { outline: none; box-shadow: none; }
+    &::placeholder { color: var(--global-text-color-light); }
+    &::-webkit-search-cancel-button { display: none; }
+  }
+
+  &__close {
+    flex: none;
+    width: 2.2em;
+    height: 2.2em;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 1.1em;
+    color: var(--global-text-color-light);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible { color: var(--course-accent); outline: none; }
+  }
+
+  &__selection {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45em 0.8em;
+    padding: 0.8em 0 0;
+    font-size: $type-size-6;
+    letter-spacing: 0.06em;
+    color: var(--global-text-color-light);
+
+    &[hidden] { display: none; }
+  }
+
+  &__chips {
+    display: contents;
+    list-style: none;
+
+    li { margin: 0; }
+  }
+
+  .tag-chip { font-size: 1em; }   // the row is already at $type-size-6
+}
+
+/* The index, after zdd14990.github.io/tags/: columns split by thin rules,
+   accent group letters, a dotted leader from each tag to its count. */
+.tag-index {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-top: 1em;
+  padding: 0.9em 0 1.4em;
+  border-top: 1px solid var(--global-text-color);
+  columns: 3 12.5rem;
+  column-gap: 2.4rem;
+  column-rule: 1px solid var(--global-border-color);
+
+  &__head {
+    column-span: all;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 1em;
+    font-size: $type-size-7;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--global-text-color-light);
+  }
+
+  &__group {
+    break-inside: avoid;
+    padding-bottom: 0.7em;
+
+    h2 {
+      margin: 0 0 0.1em;
+      padding: 0;
+      border: 0;
+      font-size: 1.05em;
+      line-height: 1.6;
+      color: var(--course-accent);
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    margin: 0;
+    padding: 0.12em 0;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    font-size: $type-size-5;
+    line-height: 1.45;
+    color: var(--global-text-color);
+    text-align: left;
+    cursor: pointer;
+
+    &::after {
+      content: "";
+      order: 1;
+      flex: 1;
+      min-width: 1.2em;
+      height: 1.05em;
+      margin: 0 0.35em;
+      border-bottom: 1px dotted var(--global-text-color-light);
+    }
+
+    &.is-large { font-weight: bold; }
+
+    &:hover,
+    &:focus-visible {
+      outline: none;
+      color: var(--course-accent);
+      &::after { border-bottom-color: var(--course-accent); }
+    }
+
+    &[aria-pressed="true"] {
+      color: var(--course-accent);
+      .tag-index__name::before { content: "✓ "; }
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+      color: var(--global-text-color);
+      &::after { border-bottom-color: var(--global-text-color-light); }
+    }
+
+    &[hidden] { display: none; }
+  }
+
+  &__name { flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+
+  &__count {
+    order: 2;
+    flex: none;
+    font-size: 0.86em;
+    line-height: 1.7;
+    font-variant-numeric: tabular-nums;
+    color: var(--global-text-color-light);
+  }
+
+  &__empty {
+    column-span: all;
+    margin: 0;
+    font-style: italic;
+    color: var(--global-text-color-light);
+  }
+
+  [hidden] { display: none; }
+}
+
+/* tags in the course detail; in the pop-up a click filters by that tag */
 .course-tag {
   display: inline-block;
-  margin: 0;
   padding: 0.2em 0.75em;
   border: 1px solid var(--global-border-color);
   border-radius: 999px;
-  background: transparent;
-  font-family: inherit;
   font-size: $type-size-6;
   line-height: 1.5;
   color: var(--global-text-color);
   text-decoration: none !important;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
 
   &:hover,
   &:focus-visible {
     border-color: var(--course-accent);
     color: var(--course-accent);
     outline: none;
-  }
-
-  &[aria-pressed="true"] {
-    border-color: var(--course-accent);
-    background: var(--course-accent);
-    color: var(--global-bg-color);
-  }
-
-  &:disabled {
-    opacity: 0.35;
-    cursor: default;
-    border-color: var(--global-border-color);
-    color: var(--global-text-color);
   }
 }
 
@@ -617,7 +884,9 @@ html.course-modal-open { overflow: hidden; }
   .shelf__panel-inner,
   .shelf__chevron { transition: none !important; }
   .course-modal__backdrop,
-  .course-modal__dialog { transition: none; }
+  .course-modal__dialog,
+  .tag-search__backdrop,
+  .tag-search__panel { transition: none; }
 }
 
 @include breakpoint(max-width $small) {
@@ -631,6 +900,9 @@ html.course-modal-open { overflow: hidden; }
   .book__title { font-size: 1em; }
   .book__title-en { font-size: $type-size-7; }
   .course-modal { padding: 0.5rem; }
+  .tag-search { padding-top: 1rem; }
+  .tag-search__panel { max-height: calc(100vh - 2rem); }
+  .tag-bar__key { display: none; }
   .course-modal__dialog { max-height: 90vh; padding: 1.5em 1.2em 1.2em; }
   .course__header .course__title { font-size: 2em; }
 }

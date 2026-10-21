@@ -23,12 +23,15 @@ layout: default
     {% for c in site.courses %}{% for t in c.tags %}{% assign tag_blob = tag_blob | append: t | append: "|" %}{% endfor %}{% endfor %}
     {% assign all_tags = tag_blob | split: "|" | uniq %}
     {% if all_tags.size > 0 %}
-      <div class="course-filter" role="group" aria-label="按标签筛选" hidden>
-        <ul class="course-filter__tags">
-          {% for t in all_tags %}
-            <li><button type="button" class="course-tag" data-tag="{{ t | escape }}" aria-pressed="false">{{ t }}</button></li>
-          {% endfor %}
-        </ul>
+      <div class="course-filter" hidden>
+        <div class="tag-bar">
+          <i class="fas fa-magnifying-glass tag-bar__icon" aria-hidden="true"></i>
+          <ul class="tag-bar__chips" aria-label="已选标签"></ul>
+          <button type="button" class="tag-bar__open" aria-haspopup="dialog" aria-controls="tag-search">
+            <span class="tag-bar__placeholder">Search tags…</span>
+            <kbd class="tag-bar__key" aria-hidden="true">/</kbd>
+          </button>
+        </div>
         <p class="course-filter__status" aria-live="polite" hidden>
           <span class="course-filter__count"></span>
           <button type="button" class="course-filter__clear">清除</button>
@@ -94,6 +97,25 @@ layout: default
   <div class="course-modal__dialog" role="dialog" aria-modal="true" tabindex="-1">
     <button type="button" class="course-modal__close" data-modal-close aria-label="关闭"><i class="fas fa-xmark" aria-hidden="true"></i></button>
     <div class="course-modal__body course"></div>
+  </div>
+</div>
+
+<div class="tag-search" id="tag-search" hidden>
+  <div class="tag-search__backdrop" data-tag-search-close></div>
+  <div class="tag-search__panel" role="dialog" aria-modal="true" aria-label="按标签筛选">
+    <div class="tag-search__bar">
+      <input type="search" class="tag-search__input" placeholder="Search tags…" aria-label="搜索标签" autocomplete="off" spellcheck="false">
+      <button type="button" class="tag-search__close" data-tag-search-close aria-label="关闭"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="tag-search__selection" hidden>
+      <ul class="tag-search__chips" aria-label="已选标签"></ul>
+      <span class="course-filter__count"></span>
+      <button type="button" class="course-filter__clear">清除</button>
+    </div>
+    <section class="tag-index" aria-label="标签索引">
+      <header class="tag-index__head"><span>Index</span><span class="tag-index__total"></span></header>
+      <p class="tag-index__empty" hidden>没有匹配的标签</p>
+    </section>
   </div>
 </div>
 
